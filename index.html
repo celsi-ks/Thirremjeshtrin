@@ -13,7 +13,7 @@
 *{box-sizing:border-box}
 body{margin:0;font:400 16px/1.55 var(--font);background:var(--bg);color:var(--ink)}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-header{background:var(--hero);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px}
+header{background:var(--hero);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(18px,calc((100% - 1040px)/2 + 18px))}
 .logo{font-weight:800;font-stretch:90%;font-size:19px;letter-spacing:-.01em;color:#fff;text-decoration:none}
 .logo b{color:#FF7A33}
 nav{display:flex;gap:10px;font-size:15px;font-weight:600}
