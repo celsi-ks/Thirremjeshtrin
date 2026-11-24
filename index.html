@@ -5,92 +5,39 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Thirr Mjeshtrin – gjej mjeshtër në Kosovë</title>
 <meta name="description" content="Gjej hidraulik, elektriçar, murator dhe mjeshtra të tjerë në qytetin tënd dhe telefono drejtpërdrejt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&display=swap">
 <style>
-:root{--bg:#eceff2;--ink:#14202b;--mut:#5b6773;--card:#fff;--line:#d5dbe1;--pri:#0f4c5c;--hi:#ffc300;--hiink:#14202b;--wa:#1c8c4e}
-@media(prefers-color-scheme:dark){:root{--bg:#10171d;--ink:#eef2f5;--mut:#9aa6b1;--card:#18222b;--line:#2a3743;--pri:#0b3a46;--wa:#2fb86b}}
+:root{--bg:#F5F7FA;--card:#fff;--ink:#12213B;--mut:#55627A;--line:#DDE3EC;--hero:#12213B;--acc:#C2410C;--accink:#fff;--wa:#168A4A;--font:'Archivo','Segoe UI',system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#0D1524;--card:#16213A;--ink:#EEF2F9;--mut:#A3AEC4;--line:#2A3752;--hero:#16213A;--acc:#FF7A33;--accink:#1A0B02;--wa:#3DCB7A}}
 *{box-sizing:border-box}
-body{margin:0;font:16px/1.55 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
-header{background:var(--pri);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;border-bottom:4px solid var(--hi)}
-.logo{font-weight:800;font-size:19px;letter-spacing:-.3px;color:#fff;text-decoration:none}
-nav{display:flex;gap:14px;font-size:15px}
-nav a{color:#fff;text-decoration:none;opacity:.92}
-nav a:hover,nav a:focus-visible{opacity:1;text-decoration:underline}
-main{max-width:720px;margin:0 auto;padding:22px 18px 60px}
-h1{font-size:28px;line-height:1.15;margin:6px 0 8px;font-weight:800;letter-spacing:-.5px}
+body{margin:0;font:400 16px/1.55 var(--font);background:var(--bg);color:var(--ink)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{background:var(--hero);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px}
+.logo{font-weight:800;font-stretch:90%;font-size:19px;letter-spacing:-.01em;color:#fff;text-decoration:none}
+.logo b{color:#FF7A33}
+nav{display:flex;gap:10px;font-size:15px;font-weight:600}
+nav a{color:#fff;text-decoration:none;padding:8px 14px;border:1.5px solid rgba(255,255,255,.55);border-radius:8px}
+nav a:hover{border-color:#fff}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px}
+.narrow{max-width:560px;padding-top:26px;padding-bottom:60px}
+.hero{background:var(--hero);color:#fff;padding:20px 0 30px}
+h1{font-weight:800;font-stretch:80%;font-size:clamp(2.2rem,8vw,3.8rem);line-height:1;letter-spacing:-.02em;margin:0 0 12px;max-width:15ch}
+.narrow h1{font-size:clamp(1.9rem,6vw,2.4rem);max-width:none}
+.hero p{margin:0 0 20px;max-width:46ch;opacity:.88;font-size:1.05rem}
 .mut{color:var(--mut)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 20px}
-@media(max-width:480px){.row{grid-template-columns:1fr}}
-select,input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:12px;margin-bottom:10px}
-select,input,textarea{outline-offset:2px}
-:focus-visible{outline:3px solid var(--hi)}
-.row select{margin:0}
-.card{background:var(--card);border:1.5px solid var(--line);border-left:6px solid var(--hi);border-radius:6px;padding:14px 16px;margin-bottom:12px}
-.card b{font-size:18px}
-.card p{margin:8px 0 12px}
-.btn{display:inline-block;font:inherit;font-weight:700;background:var(--hi);color:var(--hiink);border:0;border-radius:6px;padding:11px 18px;text-decoration:none;cursor:pointer}
-.btn.wa{background:var(--wa);color:#fff}
-.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
-</style>
-</head>
-<body>
-<header><a class="logo" href="#">Thirr Mjeshtrin</a><nav id="nav"></nav></header>
-<main id="app">Duke ngarkuar…</main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
-<script>
-const SB_URL='https://yegevgtlwlebiqbzqjbp.supabase.co';
-const SB_KEY='sb_publishable_cSCxE00EVabFMXOVAOS2Nw_98kToVML'; // çelës publik, i sigurt në faqe
-const sb=supabase.createClient(SB_URL,SB_KEY);
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=p=>{let d=(p||'').replace(/\D/g,'');if(d.startsWith('0'))d='383'+d.slice(1);return d};
-const opts=(a,ph)=>`<option value="">${ph}</option>`+a.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
-let cats=[],cities=[],user=null;
-
-async function init(){
-  const [c,t]=await Promise.all([sb.from('categories').select().order('name'),sb.from('cities').select().order('name')]);
-  cats=c.data||[];cities=t.data||[];
-  const {data}=await sb.auth.getSession();user=data.session?.user||null;
-  sb.auth.onAuthStateChange((_,s)=>{user=s?.user||null;nav()});
-  addEventListener('hashchange',nav);nav();
-}
-function nav(){
-  const h=location.hash.slice(1);
-  $('#nav').innerHTML=user?'<a href="#profili">Profili im</a><a href="#" id="out">Dil</a>':'<a href="#hyr">Hyr si mjeshtër</a>';
-  const o=$('#out');if(o)o.onclick=()=>sb.auth.signOut();
-  if(h==='hyr')return login();
-  if(h==='profili')return user?profile():(location.hash='hyr');
-  home();
-}
-function home(){
-  $('#app').innerHTML=`<h1>Gjej mjeshtrin e duhur</h1><p class="mut">Zgjidh profesionin dhe qytetin, pastaj telefono drejtpërdrejt.</p>
-  <div class="row"><select id="fc" aria-label="Profesioni">${opts(cats,'Të gjitha profesionet')}</select><select id="fy" aria-label="Qyteti">${opts(cities,'Të gjitha qytetet')}</select></div><div id="list">Duke ngarkuar…</div>`;
-  $('#fc').onchange=$('#fy').onchange=find;find();
-}
-async function find(){
-  let q=sb.from('craftsmen').select('*,categories(name),cities(name)').eq('approved',true).order('created_at',{ascending:false});
-  if($('#fc').value)q=q.eq('category_id',$('#fc').value);
-  if($('#fy').value)q=q.eq('city_id',$('#fy').value);
-  const {data,error}=await q;
-  $('#list').innerHTML=error?'<p>Nuk u ngarkuan mjeshtrat. Rifresko faqen.</p>':!data.length?'<p class="mut">Asnjë mjeshtër për këtë kërkim. Provo një qytet ose profesion tjetër.</p>':data.map(m=>`<div class="card"><b>${esc(m.full_name)}</b><div class="mut">${esc(m.categories?.name)}, ${esc(m.cities?.name)}</div><p>${esc(m.description)}</p><a class="btn" href="tel:+${num(m.phone)}">Telefono</a> <a class="btn wa" href="https://wa.me/${num(m.phone)}" target="_blank" rel="noopener">WhatsApp</a></div>`).join('');
-}
-function login(){
-  $('#app').innerHTML=`<h1>Je mjeshtër? Regjistrohu.</h1><p class="mut">Krijo llogari që klientët të të gjejnë dhe të të telefonojnë.</p>
-  <form id="f"><input id="em" type="email" placeholder="Email" required autocomplete="email"><input id="pw" type="password" placeholder="Fjalëkalimi (të paktën 6 shkronja)" required minlength="6" autocomplete="current-password"><button class="btn">Hyr</button> <button class="btn ghost" type="button" id="up">Krijo llogari</button></form><p id="msg" class="mut"></p>`;
-  const msg=t=>$('#msg').textContent=t,cr=()=>({email:$('#em').value,password:$('#pw').value});
-  $('#f').onsubmit=async e=>{e.preventDefault();const {error}=await sb.auth.signInWithPassword(cr());error?msg('Email ose fjalëkalim i gabuar.'):location.hash='profili'};
-  $('#up').onclick=async()=>{if(!$('#f').reportValidity())return;const {data,error}=await sb.auth.signUp(cr());error?msg(error.message):data.session?location.hash='profili':msg('Kontrollo email-in dhe kliko lidhjen e konfirmimit, pastaj hyr.')};
-}
-async function profile(){
-  const {data:m}=await sb.from('craftsmen').select('*').eq('user_id',user.id).maybeSingle();
-  $('#app').innerHTML=`<h1>Profili im</h1><p class="mut">${m?(m.approved?'Profili yt është publik.':'Profili është në pritje të aprovimit.'):'Plotëso të dhënat që klientët të të gjejnë.'}</p>
-  <form id="f"><input id="n" placeholder="Emri dhe mbiemri" required><select id="c" required>${opts(cats,'Profesioni')}</select><select id="y" required>${opts(cities,'Qyteti')}</select><input id="p" type="tel" placeholder="Telefoni, p.sh. 044 123 456" required><textarea id="d" rows="4" placeholder="Shkruaj shkurt çfarë pune bën"></textarea><button class="btn">Ruaj profilin</button></form><p id="msg" class="mut"></p>`;
-  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||''}
-  $('#f').onsubmit=async e=>{e.preventDefault();
-    const row={full_name:$('#n').value,category_id:+$('#c').value,city_id:+$('#y').value,phone:$('#p').value,description:$('#d').value};
-    const {error}=m?await sb.from('craftsmen').update(row).eq('id',m.id):await sb.from('craftsmen').insert({...row,user_id:user.id});
-    $('#msg').textContent=error?'Nuk u ruajt: '+error.message:'Profili u ruajt. Shfaqet publikisht pasi të aprovohet.'};
-}
-init();
-</script>
-</body>
-</html>
+.filters{display:grid;gap:10px;background:var(--card);padding:12px;border-radius:14px;grid-template-columns:1fr}
+@media(min-width:620px){.filters{grid-template-columns:1fr 1fr}}
+.filters label span{display:block;font-size:.8rem;font-weight:600;color:var(--mut);margin:2px 4px 4px}
+select,input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:0 12px;height:50px;margin-bottom:10px}
+textarea{height:auto;padding:12px}
+.filters select{margin:0}
+.count{margin:22px 0 0;color:var(--mut);font-size:.95rem}
+.list{display:grid;gap:12px;margin:12px 0 60px}
+@media(min-width:720px){.list{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+.card h3{margin:0;font-size:1.15rem;font-weight:700}
+.tag{display:inline-block;font-size:.8rem;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin-right:6px;color:var(--ink)}
+.card p{margin:0;color:var(--mut)}
+.acts{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:2px}
+.btn{display:inline-flex;align-item
