@@ -40,4 +40,58 @@ textarea{height:auto;padding:12px}
 .tag{display:inline-block;font-size:.8rem;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin-right:6px;color:var(--ink)}
 .card p{margin:0;color:var(--mut)}
 .acts{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:2px}
-.btn{display:inline-flex;align-item
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;font:inherit;font-weight:700;background:var(--acc);color:var(--accink);border:0;border-radius:10px;padding:0 20px;text-decoration:none;cursor:pointer}
+.btn.wa{background:transparent;color:var(--wa);border:1.5px solid var(--wa)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.state{grid-column:1/-1;padding:28px 18px;text-align:center;background:var(--card);border:1.5px dashed var(--line);border-radius:14px;color:var(--mut)}
+.state strong{display:block;color:var(--ink);font-size:1.1rem;margin-bottom:4px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header><a class="logo" href="#">Thirr<b>Mjeshtrin</b></a><nav id="nav"></nav></header>
+<main id="app"><div class="wrap narrow">Duke ngarkuar…</div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<script>
+const SB_URL='https://yegevgtlwlebiqbzqjbp.supabase.co';
+const SB_KEY='sb_publishable_cSCxE00EVabFMXOVAOS2Nw_98kToVML'; // çelës publik, i sigurt në faqe
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=p=>{let d=(p||'').replace(/\D/g,'');if(d.startsWith('0'))d='383'+d.slice(1);return d};
+const opts=(a,ph)=>`<option value="">${ph}</option>`+a.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+let cats=[],cities=[],user=null;
+
+async function init(){
+  const [c,t]=await Promise.all([sb.from('categories').select().order('name'),sb.from('cities').select().order('name')]);
+  cats=c.data||[];cities=t.data||[];
+  const {data}=await sb.auth.getSession();user=data.session?.user||null;
+  sb.auth.onAuthStateChange((_,s)=>{user=s?.user||null;nav()});
+  addEventListener('hashchange',nav);nav();
+}
+function nav(){
+  const h=location.hash.slice(1);
+  $('#nav').innerHTML=user?'<a href="#profili">Profili im</a><a href="#" id="out">Dil</a>':'<a href="#hyr">Hyr si mjeshtër</a>';
+  const o=$('#out');if(o)o.onclick=()=>sb.auth.signOut();
+  if(h==='hyr')return login();
+  if(h==='profili')return user?profile():(location.hash='hyr');
+  home();
+}
+function home(){
+  $('#app').innerHTML=`<section class="hero"><div class="wrap"><h1>Gjej mjeshtrin e duhur sot.</h1><p>Zgjidh profesionin dhe qytetin, pastaj telefono drejtpërdrejt.</p>
+  <div class="filters"><label><span>Profesioni</span><select id="fc">${opts(cats,'Të gjitha profesionet')}</select></label><label><span>Qyteti</span><select id="fy">${opts(cities,'Të gjitha qytetet')}</select></label></div></div></section>
+  <div class="wrap"><p class="count" id="count" aria-live="polite"></p><div class="list" id="list"><div class="state">Duke ngarkuar…</div></div></div>`;
+  $('#fc').onchange=$('#fy').onchange=find;find();
+}
+async function find(){
+  let q=sb.from('craftsmen').select('*,categories(name),cities(name)').eq('approved',true).order('created_at',{ascending:false});
+  if($('#fc').value)q=q.eq('category_id',$('#fc').value);
+  if($('#fy').value)q=q.eq('city_id',$('#fy').value);
+  const {data,error}=await q;
+  if(!$('#list'))return;
+  $('#count').textContent=error||!data?'':data.length+(data.length===1?' mjeshtër':' mjeshtra');
+  $('#list').innerHTML=error?'<div class="state"><strong>Nuk u ngarkuan mjeshtrat</strong>Rifresko faqen.</div>':!data.length?'<div class="state"><strong>Nuk u gjet asnjë mjeshtër</strong>Provo një qytet ose profesion tjetër.</div>':data.map(m=>`<article class="card"><div><h3>${esc(m.full_name)}</h3><div class="mut" style="margin-top:4px"><span class="tag">${esc(m.categories?.name)}</span>${esc(m.cities?.name)}</div></div>${m.description?`<p>${esc(m.description)}</p>`:''}<div class="acts"><a class="btn" href="tel:+${num(m.phone)}">Telefono</a><a class="btn wa" href="https://wa.me/${num(m.phone)}" target="_blank" rel="noopener">WhatsApp</a></div></article>`).join('');
+}
+function login(){
+  $('#app').innerHTML=`<div class="wrap narrow"><h1>Je mjeshtër? Regjistrohu.</h1><p class="mut">Krijo llogari që klientët të të gjejnë dhe të të telefonojnë.</p>
+  <form id="f"><input id="em" type="email" placeholder="Email" required
