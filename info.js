@@ -3,8 +3,10 @@
   var faq=[
     ["A kushton përdorimi i faqes?","Jo. Kërkimi dhe kontakti me mjeshtrat janë falas për klientët."],
     ["Si paguhet mjeshtri?","Pagesa bëhet direkt te mjeshtri, sipas marrëveshjes suaj. Faqja nuk merr pagesa nga klientët."],
-    ["A kontrollohen mjeshtrat?","Çdo profil kontrollohet nga ne para se të shfaqet publikisht. Para se të punësosh dikë, pyet për referenca dhe merr çmimin me mesazh."],
-    ["Si regjistrohem si mjeshtër?","Kliko 'Hyr si mjeshtër', krijo llogari me email dhe plotëso profilin. Pasi ta aprovojmë, shfaqesh në faqe."],
+    ["A kontrollohen mjeshtrat?","Çdo profil kontrollohet nga ne para se të shfaqet publikisht. Mjeshtrat me shenjën ✔ I verifikuar i kemi kontrolluar edhe vetë. Lexo vlerësimet e klientëve të tjerë dhe merr çmimin me mesazh para se të fillojë puna."],
+    ["Nuk kam kohë të kërkoj. Çfarë bëj?","Posto një kërkesë: shkruaj çfarë pune të duhet dhe në cilin qytet. Mjeshtrat e atij profesioni e shohin dhe të thërrasin vetë."],
+    ["Si lë vlerësim për një mjeshtër?","Hap profilin e mjeshtrit, hyr me email dhe zgjidh nga 1 deri në 5 yje. Mund ta ndryshosh ose ta fshish vlerësimin më vonë."],
+    ["Si regjistrohem si mjeshtër?","Kliko 'Hyr', krijo llogari me email dhe plotëso profilin me foto dhe punët e tua. Pasi ta aprovojmë, shfaqesh në faqe dhe sheh kërkesat e klientëve."],
     ["Si të gjej mjeshtër në qytetin tim?","Zgjidh qytetin dhe profesionin te filtrat në krye të faqes."]
   ];
   var info=document.getElementById('info'),foot=document.getElementById('foot');

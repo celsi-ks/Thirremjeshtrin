@@ -22,7 +22,7 @@ function nav(){
   const h=location.hash.slice(1);
   $('#nav').innerHTML=user?(isAdmin?'<a href="#admin">Admin</a>':'')+'<a href="#profili">Profili im</a><a href="#" id="out">Dil</a>':'<a href="#hyr">Hyr</a>';
   const o=$('#out');if(o)o.onclick=()=>sb.auth.signOut();
-  scrollTo(0,0);
+  scrollTo(0,0);document.title=TITLE;
   if(h==='hyr')return login();
   if(h==='profili')return user?profile():needLogin('profili');
   if(h.startsWith('m/'))return detail(h.slice(2));
@@ -48,7 +48,11 @@ async function find(){
   $('#count').textContent=error||!data?'':data.length+(data.length===1?' mjeshtër':' mjeshtra');
   $('#list').innerHTML=error?'<div class="state"><strong>Nuk u ngarkuan mjeshtrat</strong>Rifresko faqen.</div>':!data.length?'<div class="state"><strong>Nuk u gjet asnjë mjeshtër</strong>Provo një qytet ose profesion tjetër.</div>':data.map(card).join('');
 }
-function contacts(m){return `<div class="acts"><a class="btn" href="tel:+${num(m.phone)}">Telefono</a><a class="btn wa" href="https://wa.me/${num(m.phone)}" target="_blank" rel="noopener">WhatsApp</a></div>`}
+function contacts(m){return `<div class="acts"><a class="btn" data-ev="tel" data-id="${m.id}" href="tel:+${num(m.phone)}">Telefono</a><a class="btn wa" data-ev="wa" data-id="${m.id}" href="https://wa.me/${num(m.phone)}" target="_blank" rel="noopener">WhatsApp</a></div>`}
+// Numërojmë klikimet në Telefono/WhatsApp që mjeshtri të shohë sa klientë e kontaktuan.
+addEventListener("click",e=>{const a=e.target.closest("[data-ev]");if(a)logEvent(a.dataset.id,a.dataset.ev)});
+const logEvent=(id,kind)=>sb.rpc('log_event',{p_id:id,p_kind:kind}).then(()=>{},()=>{});
+const TITLE=document.title;
 const badge=m=>m.verified?' <span class="ver" title="Mjeshtri është verifikuar nga Thirr Mjeshtrin">✔ I verifikuar</span>':'';
 const avatar=(m,cls='av')=>m.photo_url?`<img class="${cls}" src="${esc(m.photo_url)}" alt="" loading="lazy">`:`<span class="${cls} ini" aria-hidden="true">${esc((m.full_name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase())}</span>`;
 function card(m){
@@ -62,6 +66,7 @@ async function detail(id){
   if(location.hash.slice(1)!=='m/'+id)return;
   if(!m){$('#app').innerHTML='<div class="wrap narrow"><h1>Mjeshtri nuk u gjet</h1><p class="mut">Profili mund të jetë hequr.</p><a class="btn" href="#">Kthehu te lista</a></div>';return}
   document.title=m.full_name+' – '+m.category_name+' në '+m.city_name+' | Thirr Mjeshtrin';
+  logEvent(m.id,'view');
   const mine=user&&(rv||[]).find(r=>r.client_id===user.id);
   $('#app').innerHTML=`<div class="wrap narrow"><a class="back" href="#">← Të gjithë mjeshtrat</a>
   <div class="dh">${avatar(m,'av big')}<div><h1>${esc(m.full_name)}</h1><div class="mut"><span class="tag">${esc(m.category_name)}</span>${esc(m.city_name)}${badge(m)}</div><div style="margin-top:8px">${rating(m)}</div></div></div>
@@ -100,7 +105,7 @@ async function profile(){
   <div id="extra"></div>
   <form id="f"><input id="n" placeholder="Emri dhe mbiemri" required><select id="c" required>${opts(cats,'Profesioni')}</select><select id="y" required>${opts(cities,'Qyteti')}</select><input id="p" type="tel" placeholder="Telefoni, p.sh. 044 123 456" required><textarea id="d" rows="4" placeholder="Shkruaj shkurt çfarë pune bën"></textarea><button class="btn">Ruaj profilin</button></form><p id="msg" class="mut"></p>
   <div id="photos"></div></div>`;
-  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||'';photos(m);if(m.approved)craftsmanRequests(m,$('#extra'))}
+  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||'';photos(m);if(m.approved)myStats().then(()=>craftsmanRequests(m,$('#extra').appendChild(document.createElement('div'))))}
   $('#f').onsubmit=async e=>{e.preventDefault();
     const row={full_name:$('#n').value,category_id:+$('#c').value,city_id:+$('#y').value,phone:$('#p').value,description:$('#d').value};
     const {error}=m?await sb.from('craftsmen').update(row).eq('id',m.id):await sb.from('craftsmen').insert({...row,user_id:user.id});
@@ -108,6 +113,13 @@ async function profile(){
     if(!m)return profile();
     $('#msg').textContent=m.approved?'Profili u ruajt.':'Profili u ruajt. Shfaqet publikisht pasi të aprovohet.'};
   return m;
+}
+async function myStats(){
+  const {data}=await sb.rpc('my_stats');const box=$('#extra');
+  if(!data||!box)return;
+  const s=Object.fromEntries(data.map(r=>[r.kind,r]));
+  const tile=(k,l)=>`<div class="tile"><b>${s[k]?.last30??0}</b><span>${l}</span><small class="mut">gjithsej ${s[k]?.total??0}</small></div>`;
+  box.insertAdjacentHTML('afterbegin',`<section class="stats"><h2>30 ditët e fundit</h2><div class="tiles">${tile('view','Shikime të profilit')}${tile('tel','Thirrje')}${tile('wa','Mesazhe WhatsApp')}</div></section>`);
 }
 // Zvogëlon foton në shfletues (max 1280px) që ngarkimi të jetë i shpejtë edhe me internet mobil.
 function shrink(file,max=1280){

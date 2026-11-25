@@ -14,15 +14,16 @@ function admin(tab){
 const admErr=(box,e)=>box.innerHTML=`<div class="state"><strong>Gabim</strong>${esc(e.message)}</div>`;
 async function adminCraftsmen(box,filter){
   filter=filter||'pritje';
-  const {data,error}=await sb.rpc('admin_craftsmen');
+  const [{data,error},{data:ev}]=await Promise.all([sb.rpc('admin_craftsmen'),sb.rpc('admin_event_counts')]);
   if(error)return admErr(box,error);
+  const evs=Object.fromEntries((ev||[]).map(e=>[e.craftsman_id,e]));
   const pending=data.filter(m=>!m.approved);
   const rows=filter==='pritje'?pending:data;
   box.innerHTML=`<div class="seg"><button type="button" data-f="pritje" aria-pressed="${filter==='pritje'}">Në pritje (${pending.length})</button><button type="button" data-f="te-gjithe" aria-pressed="${filter!=='pritje'}">Të gjithë (${data.length})</button></div>
   ${rows.length?rows.map(m=>`<article class="card arow" data-id="${m.id}"><div class="ch">${avatar(m)}<div>
     <h3>${m.approved?`<a class="cl" href="#m/${m.id}">${esc(m.full_name)}</a>`:esc(m.full_name)}${badge(m)} ${m.approved?'':'<span class="pend">Në pritje</span>'}</h3>
     <div class="mut"><span class="tag">${esc(m.category_name)}</span>${esc(m.city_name)} · ${esc(m.phone)}</div>
-    <div class="mut small">${esc(m.email||'pa llogari')} · regjistruar ${date(m.created_at)} · ${m.review_count} vlerësime</div></div></div>
+    <div class="mut small">${esc(m.email||'pa llogari')} · regjistruar ${date(m.created_at)} · ${m.review_count} vlerësime${m.approved?` · 30 ditë: ${evs[m.id]?.views||0} shikime, ${evs[m.id]?.contacts||0} kontakte`:''}</div></div></div>
     ${m.description?`<p>${esc(m.description)}</p>`:''}
     ${(m.gallery||[]).length?`<div class="gal sm">${m.gallery.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join('')}</div>`:''}
     <div class="btns">${m.approved?'<button class="btn ghost" data-a="unapprove">Hiq nga faqja</button>':'<button class="btn" data-a="approve">Aprovo</button>'}
