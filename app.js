@@ -45,8 +45,10 @@ async function find(){
   $('#list').innerHTML=error?'<div class="state"><strong>Nuk u ngarkuan mjeshtrat</strong>Rifresko faqen.</div>':!data.length?'<div class="state"><strong>Nuk u gjet asnjë mjeshtër</strong>Provo një qytet ose profesion tjetër.</div>':data.map(card).join('');
 }
 function contacts(m){return `<div class="acts"><a class="btn" href="tel:+${num(m.phone)}">Telefono</a><a class="btn wa" href="https://wa.me/${num(m.phone)}" target="_blank" rel="noopener">WhatsApp</a></div>`}
+const badge=m=>m.verified?' <span class="ver" title="Mjeshtri është verifikuar nga Thirr Mjeshtrin">✔ I verifikuar</span>':'';
+const avatar=(m,cls='av')=>m.photo_url?`<img class="${cls}" src="${esc(m.photo_url)}" alt="" loading="lazy">`:`<span class="${cls} ini" aria-hidden="true">${esc((m.full_name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase())}</span>`;
 function card(m){
-  return `<article class="card"><div><h3><a class="cl" href="#m/${m.id}">${esc(m.full_name)}</a></h3><div class="mut" style="margin-top:4px"><span class="tag">${esc(m.category_name)}</span>${esc(m.city_name)}</div><div style="margin-top:6px">${rating(m)}</div></div>${m.description?`<p class="clamp">${esc(m.description)}</p>`:''}${contacts(m)}</article>`;
+  return `<article class="card"><div class="ch">${avatar(m)}<div><h3><a class="cl" href="#m/${m.id}">${esc(m.full_name)}</a>${badge(m)}</h3><div class="mut" style="margin-top:4px"><span class="tag">${esc(m.category_name)}</span>${esc(m.city_name)}</div><div style="margin-top:6px">${rating(m)}</div></div></div>${m.description?`<p class="clamp">${esc(m.description)}</p>`:''}${contacts(m)}</article>`;
 }
 async function detail(id){
   $('#app').innerHTML='<div class="wrap narrow">Duke ngarkuar…</div>';
@@ -58,8 +60,9 @@ async function detail(id){
   document.title=m.full_name+' – '+m.category_name+' në '+m.city_name+' | Thirr Mjeshtrin';
   const mine=user&&(rv||[]).find(r=>r.client_id===user.id);
   $('#app').innerHTML=`<div class="wrap narrow"><a class="back" href="#">← Të gjithë mjeshtrat</a>
-  <h1>${esc(m.full_name)}</h1><div class="mut"><span class="tag">${esc(m.category_name)}</span>${esc(m.city_name)}</div><div style="margin:10px 0 14px">${rating(m)}</div>
+  <div class="dh">${avatar(m,'av big')}<div><h1>${esc(m.full_name)}</h1><div class="mut"><span class="tag">${esc(m.category_name)}</span>${esc(m.city_name)}${badge(m)}</div><div style="margin-top:8px">${rating(m)}</div></div></div>
   ${m.description?`<p class="desc">${esc(m.description)}</p>`:''}${contacts(m)}
+  ${(m.gallery||[]).length?`<section class="rv"><h2>Punët e mia</h2><div class="gal">${m.gallery.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Foto e punës" loading="lazy"></a>`).join('')}</div></section>`:''}
   <section class="rv"><h2>Vlerësimet</h2><div id="rvform"></div>${(rv||[]).length?rv.map(r=>`<div class="rvi"><div>${stars(r.rating)} <b>${esc(r.author_name||'Klient')}</b> <span class="mut">· ${date(r.created_at)}</span></div>${r.comment?`<p>${esc(r.comment)}</p>`:''}</div>`).join(''):'<p class="mut">Ende pa vlerësime. Bëhu i pari që e vlerëson.</p>'}</section></div>`;
   reviewForm(m,mine);
 }
@@ -88,12 +91,51 @@ function login(){
 }
 async function profile(){
   const {data:m}=await sb.from('craftsmen').select('*').eq('user_id',user.id).maybeSingle();
+  if(location.hash!=='#profili')return;
   $('#app').innerHTML=`<div class="wrap narrow"><h1>Profili im</h1><p class="mut">${m?(m.approved?`Profili yt është publik. <a href="#m/${m.id}">Shiko si e shohin klientët</a>`:'Profili është në pritje të aprovimit.'):'Je mjeshtër? Plotëso të dhënat që klientët të të gjejnë. Nëse je klient, nuk ke nevojë të plotësosh asgjë.'}</p>
-  <form id="f"><input id="n" placeholder="Emri dhe mbiemri" required><select id="c" required>${opts(cats,'Profesioni')}</select><select id="y" required>${opts(cities,'Qyteti')}</select><input id="p" type="tel" placeholder="Telefoni, p.sh. 044 123 456" required><textarea id="d" rows="4" placeholder="Shkruaj shkurt çfarë pune bën"></textarea><button class="btn">Ruaj profilin</button></form><p id="msg" class="mut"></p></div>`;
-  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||''}
+  <div id="extra"></div>
+  <form id="f"><input id="n" placeholder="Emri dhe mbiemri" required><select id="c" required>${opts(cats,'Profesioni')}</select><select id="y" required>${opts(cities,'Qyteti')}</select><input id="p" type="tel" placeholder="Telefoni, p.sh. 044 123 456" required><textarea id="d" rows="4" placeholder="Shkruaj shkurt çfarë pune bën"></textarea><button class="btn">Ruaj profilin</button></form><p id="msg" class="mut"></p>
+  <div id="photos"></div></div>`;
+  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||'';photos(m)}
   $('#f').onsubmit=async e=>{e.preventDefault();
     const row={full_name:$('#n').value,category_id:+$('#c').value,city_id:+$('#y').value,phone:$('#p').value,description:$('#d').value};
     const {error}=m?await sb.from('craftsmen').update(row).eq('id',m.id):await sb.from('craftsmen').insert({...row,user_id:user.id});
-    $('#msg').textContent=error?'Nuk u ruajt: '+error.message:'Profili u ruajt. Shfaqet publikisht pasi të aprovohet.'};
+    if(error)return $('#msg').textContent='Nuk u ruajt: '+error.message;
+    if(!m)return profile();
+    $('#msg').textContent=m.approved?'Profili u ruajt.':'Profili u ruajt. Shfaqet publikisht pasi të aprovohet.'};
+  return m;
+}
+// Zvogëlon foton në shfletues (max 1280px) që ngarkimi të jetë i shpejtë edhe me internet mobil.
+function shrink(file,max=1280){
+  return new Promise((ok,bad)=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(img.src);c.toBlob(b=>b?ok(b):bad(new Error('Foto nuk u lexua')),'image/jpeg',.85)};
+    img.onerror=()=>bad(new Error('Ky skedar nuk është foto'));img.src=URL.createObjectURL(file)});
+}
+async function upload(file){
+  const blob=await shrink(file),path=`${user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+  const {error}=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg'});
+  if(error)throw error;
+  return sb.storage.from('photos').getPublicUrl(path).data.publicUrl;
+}
+const pathOf=u=>u&&u.split('/object/public/photos/')[1];
+function photos(m){
+  const box=$('#photos');
+  box.innerHTML=`<section class="rv"><h2>Fotot</h2><p class="mut">Profilet me foto marrin më shumë thirrje. Fotot e punëve u tregojnë klientëve cilësinë tënde (deri në 8).</p>
+  <div class="ph">${avatar(m,'av big')}<label class="btn ghost up">Ndrysho foton e profilit<input type="file" accept="image/*" id="pp" hidden></label>${m.photo_url?'<button class="btn ghost" type="button" id="pdel">Hiqe</button>':''}</div>
+  <div class="gal edit">${(m.gallery||[]).map((u,i)=>`<div><img src="${esc(u)}" alt="Foto e punës ${i+1}"><button type="button" class="x" data-i="${i}" aria-label="Fshi foton ${i+1}">✕</button></div>`).join('')}
+  ${(m.gallery||[]).length<8?'<label class="add">+ Shto foto pune<input type="file" accept="image/*" id="gp" multiple hidden></label>':''}</div><p id="pmsg" class="mut"></p></section>`;
+  const say=t=>$('#pmsg').textContent=t;
+  const save=async(patch,old)=>{const {error}=await sb.from('craftsmen').update(patch).eq('id',m.id);
+    if(error)return say('Nuk u ruajt: '+error.message);
+    if(old.length)await sb.storage.from('photos').remove(old.map(pathOf).filter(Boolean));
+    Object.assign(m,patch);photos(m)};
+  $('#pp').onchange=async e=>{const f=e.target.files[0];if(!f)return;say('Duke ngarkuar…');
+    try{await save({photo_url:await upload(f)},m.photo_url?[m.photo_url]:[])}catch(err){say('Nuk u ngarkua: '+err.message)}};
+  if(m.photo_url)$('#pdel').onclick=()=>save({photo_url:null},[m.photo_url]);
+  const gp=$('#gp');if(gp)gp.onchange=async e=>{const fs=[...e.target.files].slice(0,8-(m.gallery||[]).length);if(!fs.length)return;
+    say('Duke ngarkuar '+fs.length+' foto…');
+    try{const urls=[];for(const f of fs)urls.push(await upload(f));await save({gallery:[...(m.gallery||[]),...urls]},[])}catch(err){say('Nuk u ngarkua: '+err.message)}};
+  box.querySelectorAll('.x').forEach(b=>b.onclick=()=>{const g=[...m.gallery],[u]=g.splice(+b.dataset.i,1);save({gallery:g},[u])});
 }
 init();
