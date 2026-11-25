@@ -26,6 +26,7 @@ function nav(){
   if(h==='hyr')return login();
   if(h==='profili')return user?profile():needLogin('profili');
   if(h.startsWith('m/'))return detail(h.slice(2));
+  if(h==='kerkese')return user?postRequest():needLogin('kerkese');
   if(h==='admin'||h.startsWith('admin/'))return isAdmin?admin(h.split('/')[1]||'mjeshtrat'):user?home():needLogin(h);
   home();
 }
@@ -33,7 +34,8 @@ function needLogin(next){try{sessionStorage.setItem('next',next)}catch(e){}locat
 function home(){
   $('#app').innerHTML=`<section class="hero"><div class="wrap"><h1>Gjej mjeshtrin e duhur sot.</h1><p>Zgjidh profesionin dhe qytetin, pastaj telefono drejtpërdrejt.</p>
   <div class="filters"><label><span>Profesioni</span><select id="fc">${opts(cats,'Të gjitha profesionet')}</select></label><label><span>Qyteti</span><select id="fy">${opts(cities,'Të gjitha qytetet')}</select></label></div></div></section>
-  <div class="wrap"><div class="bar"><p class="count" id="count" aria-live="polite"></p><label class="sort"><span>Rendit</span><select id="fs"><option value="new">Më të rinjtë</option><option value="top">Më të vlerësuarit</option></select></label></div><div class="list" id="list"><div class="state">Duke ngarkuar…</div></div></div>`;
+  <div class="wrap"><div class="bar"><p class="count" id="count" aria-live="polite"></p><label class="sort"><span>Rendit</span><select id="fs"><option value="new">Më të rinjtë</option><option value="top">Më të vlerësuarit</option></select></label></div><div class="list" id="list"><div class="state">Duke ngarkuar…</div></div>
+  <div class="band post"><div><h2>Nuk ke kohë të kërkosh?</h2><p>Posto punën që të duhet dhe mjeshtrat e atij profesioni të thërrasin vetë.</p></div><a class="btn" href="#kerkese">Posto kërkesë falas</a></div></div>`;
   $('#fc').onchange=$('#fy').onchange=$('#fs').onchange=find;find();
 }
 async function find(){
@@ -98,7 +100,7 @@ async function profile(){
   <div id="extra"></div>
   <form id="f"><input id="n" placeholder="Emri dhe mbiemri" required><select id="c" required>${opts(cats,'Profesioni')}</select><select id="y" required>${opts(cities,'Qyteti')}</select><input id="p" type="tel" placeholder="Telefoni, p.sh. 044 123 456" required><textarea id="d" rows="4" placeholder="Shkruaj shkurt çfarë pune bën"></textarea><button class="btn">Ruaj profilin</button></form><p id="msg" class="mut"></p>
   <div id="photos"></div></div>`;
-  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||'';photos(m)}
+  if(m){$('#n').value=m.full_name;$('#c').value=m.category_id;$('#y').value=m.city_id;$('#p').value=m.phone;$('#d').value=m.description||'';photos(m);if(m.approved)craftsmanRequests(m,$('#extra'))}
   $('#f').onsubmit=async e=>{e.preventDefault();
     const row={full_name:$('#n').value,category_id:+$('#c').value,city_id:+$('#y').value,phone:$('#p').value,description:$('#d').value};
     const {error}=m?await sb.from('craftsmen').update(row).eq('id',m.id):await sb.from('craftsmen').insert({...row,user_id:user.id});

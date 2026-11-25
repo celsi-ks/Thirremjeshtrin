@@ -77,3 +77,9 @@ footer small{opacity:.7}
 @media(prefers-color-scheme:dark){.btn.danger{color:#FF8A80;border-color:#FF8A80}}
 .btn.sm{min-height:36px;padding:0 12px;font-size:.85rem;margin-top:8px}
 .btn:disabled{opacity:.5;cursor:wait}
+/* kërkesat */
+.band.post{margin:-30px 0 50px}
+.reqs{background:var(--card);border:1.5px solid var(--acc);border-radius:14px;padding:16px;margin:6px 0 24px}
+.reqs h2{font-size:1.2rem;margin:0 0 4px}
+.reqs .rvi:first-of-type{margin-top:8px}
+.reqs .btn{min-height:42px;padding:0 12px}
