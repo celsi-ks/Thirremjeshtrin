@@ -36,6 +36,15 @@ export default function Login() {
     setMsg('Kontrollo email-in dhe kliko lidhjen e konfirmimit, pastaj hyr.');
   }
 
+  async function forgot() {
+    if (!/\S+@\S+\.\S+/.test(email)) return setMsg('Shkruaj email-in tënd më sipër, pastaj kliko "Harrova fjalëkalimin".');
+    setBusy(true);
+    const { error } = await sb().auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/fjalekalimi' });
+    setBusy(false);
+    if (error) return setMsg(/rate|seconds/i.test(error.message) ? 'Prit një minutë para se të kërkosh lidhje të re.' : error.message);
+    setMsg('Nëse ky email ka llogari, të dërguam një lidhje për fjalëkalim të ri. Kontrollo edhe dosjen Spam.');
+  }
+
   return (
     <div className="wrap narrow">
       <h1>Hyr ose krijo llogari</h1>
@@ -48,6 +57,7 @@ export default function Login() {
           <button className="btn ghost" type="button" disabled={busy} onClick={signUp}>Krijo llogari</button>
         </div>
       </form>
+      <p style={{ marginTop: 12 }}><button type="button" className="linkbtn" disabled={busy} onClick={forgot}>Harrova fjalëkalimin</button></p>
       {msg && <p className="mut">{msg}</p>}
     </div>
   );

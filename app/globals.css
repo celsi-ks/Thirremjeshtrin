@@ -146,3 +146,4 @@ footer small{opacity:.7}
 .links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
 .links a{font-size:.88rem;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;text-decoration:none}
 .links a:hover{border-color:var(--acc)}
+.linkbtn{font:inherit;font-weight:600;color:var(--ink);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
