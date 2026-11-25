@@ -8,23 +8,25 @@ const opts=(a,ph)=>`<option value="">${ph}</option>`+a.map(x=>`<option value="${
 const stars=r=>{const n=Math.round(+r||0);return '<span class="stars" aria-hidden="true">'+'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i></span>'};
 const rating=m=>m.review_count?`<span class="rate">${stars(m.avg_rating)} <b>${(+m.avg_rating).toFixed(1)}</b> <span class="mut">(${m.review_count} ${m.review_count===1?'vlerësim':'vlerësime'})</span></span>`:'<span class="rate mut">Ende pa vlerësime</span>';
 const date=d=>new Date(d).toLocaleDateString('sq-AL',{day:'numeric',month:'short',year:'numeric'});
-let cats=[],cities=[],user=null;
+let cats=[],cities=[],user=null,isAdmin=false;
+const checkAdmin=async()=>{isAdmin=false;if(user){const {data}=await sb.rpc('is_admin');isAdmin=data===true}};
 
 async function init(){
   const [c,t]=await Promise.all([sb.from('categories').select().order('name'),sb.from('cities').select().order('name')]);
   cats=c.data||[];cities=t.data||[];
-  const {data}=await sb.auth.getSession();user=data.session?.user||null;
-  sb.auth.onAuthStateChange((ev,s)=>{const was=user?.id;user=s?.user||null;if(was!==user?.id)nav()});
+  const {data}=await sb.auth.getSession();user=data.session?.user||null;await checkAdmin();
+  sb.auth.onAuthStateChange((ev,s)=>{const was=user?.id;user=s?.user||null;if(was!==user?.id)setTimeout(async()=>{await checkAdmin();nav()})});
   addEventListener('hashchange',nav);nav();
 }
 function nav(){
   const h=location.hash.slice(1);
-  $('#nav').innerHTML=user?'<a href="#profili">Profili im</a><a href="#" id="out">Dil</a>':'<a href="#hyr">Hyr</a>';
+  $('#nav').innerHTML=user?(isAdmin?'<a href="#admin">Admin</a>':'')+'<a href="#profili">Profili im</a><a href="#" id="out">Dil</a>':'<a href="#hyr">Hyr</a>';
   const o=$('#out');if(o)o.onclick=()=>sb.auth.signOut();
   scrollTo(0,0);
   if(h==='hyr')return login();
   if(h==='profili')return user?profile():needLogin('profili');
   if(h.startsWith('m/'))return detail(h.slice(2));
+  if(h==='admin'||h.startsWith('admin/'))return isAdmin?admin(h.split('/')[1]||'mjeshtrat'):user?home():needLogin(h);
   home();
 }
 function needLogin(next){try{sessionStorage.setItem('next',next)}catch(e){}location.hash='hyr'}
