@@ -14,6 +14,6 @@
     +faq.map(function(f){return '<details><summary>'+f[0]+'</summary><p>'+f[1]+'</p></details>'}).join('')
     +'</div></section><section class="sec"><div class="wrap"><div class="band"><div><h2>Je mjeshtër?</h2><p>Shtoje veten në katalog dhe merr thirrje nga klientë në qytetin tënd.</p></div><a class="btn" href="#hyr">Regjistrohu falas</a></div></div></section>';
   foot.innerHTML='<div class="wrap"><a class="logo" href="#">Thirr<b>Mjeshtrin</b></a><p>Katalog mjeshtrash në Kosovë. Gjej mjeshtrin e duhur dhe kontakto direkt.</p><div class="fl"><a href="#">Gjej mjeshtër</a><a href="#si-funksionon">Si funksionon</a><a href="#pyetjet">Pyetjet</a><a href="#hyr">Hyr si mjeshtër</a></div><small>© '+new Date().getFullYear()+' Thirr Mjeshtrin</small></div>';
-  function sync(){var h=location.hash.slice(1);info.hidden=(h==='hyr'||h==='profili')}
+  function sync(){var h=location.hash.slice(1);info.hidden=/^(hyr|profili|admin|kerkese|kerkesat|m\/)/.test(h)}
   addEventListener('hashchange',sync);sync();
 })();
