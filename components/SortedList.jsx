@@ -6,7 +6,7 @@ import { slugify } from '@/lib/util';
 export default function SortedList({ items }) {
   const [sort, setSort] = useState('new');
   const [q, setQ] = useState('');
-  // Kërkim pa shkronja të veçanta: "fushe" gjen "Fushë Kosovë", "elektricist" gjen "Elektriçar".
+  // Kërkim pa shkronja të veçanta: "fushe" gjen "Fushë Kosovë", "hidraulik" gjen "Hidraulikë & Instalime Uji".
   const words = slugify(q).split('-').filter(Boolean);
   const found = words.length
     ? items.filter((m) => { const t = slugify([m.full_name, m.category_name, m.city_name, m.description].join(' ')); return words.every((w) => t.includes(w)); })

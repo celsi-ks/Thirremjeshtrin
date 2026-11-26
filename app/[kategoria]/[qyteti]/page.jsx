@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import ListPage, { listTitle } from '@/components/ListPage';
-import { findCategory, findCity, getCraftsmen } from '@/lib/data';
+import { findCategory, findOldCategory, findCity, getCraftsmen } from '@/lib/data';
 import { listPath } from '@/lib/util';
 
 export const revalidate = 300;
@@ -27,6 +27,10 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { cat, city } = await load(params);
+  if (!cat && city) {
+    const old = await findOldCategory((await params).kategoria);
+    if (old) permanentRedirect(listPath(old, city));
+  }
   if (!cat || !city) notFound();
   return <ListPage cat={cat} city={city} />;
 }

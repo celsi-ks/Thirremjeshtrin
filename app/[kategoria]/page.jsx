@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import ListPage, { listTitle } from '@/components/ListPage';
-import { findCategory, getCraftsmen } from '@/lib/data';
+import { findCategory, findOldCategory, getCraftsmen } from '@/lib/data';
 import { listPath } from '@/lib/util';
 
 export const revalidate = 300;
@@ -20,7 +20,12 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const cat = await findCategory((await params).kategoria);
-  if (!cat) notFound();
+  const slug = (await params).kategoria;
+  const cat = await findCategory(slug);
+  if (!cat) {
+    const old = await findOldCategory(slug);
+    if (old) permanentRedirect(listPath(old));
+    notFound();
+  }
   return <ListPage cat={cat} />;
 }
