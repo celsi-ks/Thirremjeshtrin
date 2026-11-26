@@ -9,7 +9,7 @@ import { Avatar } from '@/components/ui';
 
 const REQ_DAYS = 30;
 
-export default function Profile({ cats, cities }) {
+export default function Profile({ cats, cities, services }) {
   const { user, ready } = useUser();
   const router = useRouter();
   const [m, setM] = useState(undefined); // undefined = duke ngarkuar, null = pa profil
@@ -34,16 +34,25 @@ export default function Profile({ cats, cities }) {
       </p>
       {!m && <p><Link className="btn ghost" href="/kerkese">Je klient? Posto një kërkesë</Link></p>}
       {m?.approved && <><Stats /><Requests m={m} cats={cats} cities={cities} /></>}
-      <ProfileForm m={m} cats={cats} cities={cities} userId={user.id} onSaved={load} />
+      <ProfileForm m={m} cats={cats} cities={cities} services={services} userId={user.id} onSaved={load} />
       {m && <Photos m={m} userId={user.id} onChange={(patch) => setM({ ...m, ...patch })} />}
     </div>
   );
 }
 
-function ProfileForm({ m, cats, cities, userId, onSaved }) {
-  const [f, setF] = useState({ full_name: m?.full_name || '', category_id: m?.category_id || '', city_id: m?.city_id || '', phone: m?.phone || '', description: m?.description || '' });
+const MAX_SERVICES = 12;
+
+function ProfileForm({ m, cats, cities, services, userId, onSaved }) {
+  const [f, setF] = useState({
+    full_name: m?.full_name || '', category_id: m?.category_id || '', city_id: m?.city_id || '', phone: m?.phone || '', description: m?.description || '',
+    service_ids: m?.service_ids || [], urgent: m?.urgent || false, notify_requests: m?.notify_requests ?? true,
+  });
   const [msg, setMsg] = useState('');
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  // Kur ndërrohet profesioni, shërbimet e vjetra nuk vlejnë më.
+  const setCat = (e) => setF({ ...f, category_id: e.target.value, service_ids: [] });
+  const catServices = services.filter((s) => s.category_id === +f.category_id);
+  const toggle = (id) => setF({ ...f, service_ids: f.service_ids.includes(id) ? f.service_ids.filter((x) => x !== id) : [...f.service_ids, id].slice(0, MAX_SERVICES) });
   async function save(e) {
     e.preventDefault();
     const row = { ...f, category_id: +f.category_id, city_id: +f.city_id };
@@ -55,10 +64,22 @@ function ProfileForm({ m, cats, cities, userId, onSaved }) {
   return (
     <form onSubmit={save}>
       <input placeholder="Emri dhe mbiemri" required value={f.full_name} onChange={set('full_name')} />
-      <select required value={f.category_id} onChange={set('category_id')}><option value="">Profesioni</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+      <select required value={f.category_id} onChange={setCat}><option value="">Profesioni</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+      {catServices.length > 0 && (
+        <fieldset className="chk">
+          <legend>Çfarë shërbimesh bën? <span className="mut">Klientët të gjejnë sipas tyre.</span></legend>
+          {catServices.map((s) => (
+            <label key={s.id}><input type="checkbox" checked={f.service_ids.includes(s.id)} onChange={() => toggle(s.id)} />{s.name}</label>
+          ))}
+        </fieldset>
+      )}
       <select required value={f.city_id} onChange={set('city_id')}><option value="">Qyteti</option>{cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
       <input type="tel" placeholder="Telefoni, p.sh. 044 123 456" required value={f.phone} onChange={set('phone')} />
       <textarea rows={4} placeholder="Shkruaj shkurt çfarë pune bën" value={f.description} onChange={set('description')} />
+      <label className="opt"><input type="checkbox" checked={f.urgent} onChange={(e) => setF({ ...f, urgent: e.target.checked })} />
+        <span><b>Pranoj thirrje urgjente</b><br /><span className="mut">Dil me shenjën "Thirrje urgjente" kur mund të vish shpejt, edhe jashtë orarit.</span></span></label>
+      <label className="opt"><input type="checkbox" checked={f.notify_requests} onChange={(e) => setF({ ...f, notify_requests: e.target.checked })} />
+        <span><b>Më njofto me email për kërkesa të reja</b><br /><span className="mut">Kur një klient poston punë në profesionin dhe qytetin tënd.</span></span></label>
       <button className="btn">Ruaj profilin</button>
       {msg && <p className="mut">{msg}</p>}
     </form>

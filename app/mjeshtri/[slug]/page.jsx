@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getCraftsman, getReviews, getCategories, getCities } from '@/lib/data';
 import { craftsmanPath, listPath, intlPhone, SITE } from '@/lib/util';
-import { Avatar, Rating, Verified } from '@/components/ui';
+import { Avatar, Rating, Verified, Urgent, Services } from '@/components/ui';
 import ContactButtons, { ViewLogger, ShareButton } from '@/components/ContactButtons';
 import Reviews from '@/components/Reviews';
 
@@ -38,6 +38,7 @@ export default async function Page({ params }) {
     description: m.description || undefined, image: m.photo_url || undefined,
     address: { '@type': 'PostalAddress', addressLocality: m.city_name, addressCountry: 'XK' },
     areaServed: m.city_name,
+    knowsAbout: m.services?.length ? m.services : undefined,
     aggregateRating: m.review_count ? { '@type': 'AggregateRating', ratingValue: (+m.avg_rating).toFixed(1), reviewCount: m.review_count, bestRating: 5, worstRating: 1 } : undefined,
     review: reviews.slice(0, 10).map((r) => ({
       '@type': 'Review', author: { '@type': 'Person', name: r.author_name || 'Klient' }, datePublished: r.created_at.slice(0, 10),
@@ -58,9 +59,10 @@ export default async function Page({ params }) {
         <div>
           <h1>{m.full_name}</h1>
           <div className="mut"><span className="tag">{m.category_name}</span>{m.city_name}<Verified m={m} /></div>
-          <div style={{ marginTop: 8 }}><Rating m={m} /></div>
+          <div style={{ marginTop: 8 }}><Rating m={m} /> <Urgent m={m} /></div>
         </div>
       </div>
+      <Services m={m} />
       {m.description && <p className="desc">{m.description}</p>}
       <ContactButtons m={m} />
       <p style={{ margin: '12px 0 0' }}><ShareButton title={`${m.full_name} – ${m.category_name} në ${m.city_name}`} /></p>

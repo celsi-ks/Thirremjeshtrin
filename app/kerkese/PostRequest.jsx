@@ -27,8 +27,10 @@ export default function PostRequest({ cats, cities }) {
     e.preventDefault();
     const row = { category_id: +f.category_id, city_id: +f.city_id, details: f.details.trim(), name: f.name.trim(), phone: f.phone.trim() };
     if (row.details.length < 10) return setMsg('Shkruaj pak më shumë për punën (të paktën 10 shkronja).');
-    const { error } = await sb().from('requests').insert(row);
+    const { data, error } = await sb().from('requests').insert(row).select('id').single();
     if (error) return setMsg('Nuk u dërgua: ' + error.message);
+    // Njofto me email mjeshtrat e këtij profesioni në këtë qytet (nuk e pengon postimin nëse dështon).
+    sb().functions.invoke('notify-request', { body: { id: data.id } }).then(() => {}, () => {});
     setF(empty);
     setMsg('✔ Kërkesa u dërgua. Mjeshtrat do të të thërrasin së shpejti.');
     loadMine();
