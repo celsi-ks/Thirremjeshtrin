@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { sb } from '@/lib/supabase';
 import { intlPhone } from '@/lib/util';
 
@@ -19,4 +19,19 @@ export default function ContactButtons({ m }) {
 export function ViewLogger({ id }) {
   useEffect(() => { logEvent(id, 'view'); }, [id]);
   return null;
+}
+
+/** Ndaj profilin: në telefon hapet menyja e ndarjes (WhatsApp, Viber...), në kompjuter kopjohet lidhja. */
+export function ShareButton({ title }) {
+  const [done, setDone] = useState(false);
+  async function share() {
+    const url = location.href.split('#')[0];
+    try {
+      if (navigator.share) return await navigator.share({ title, url });
+      await navigator.clipboard.writeText(url);
+      setDone(true);
+      setTimeout(() => setDone(false), 2000);
+    } catch { /* përdoruesi e mbylli menynë */ }
+  }
+  return <button type="button" className="linkbtn share" onClick={share}>{done ? '✔ Lidhja u kopjua' : 'Ndaj këtë mjeshtër'}</button>;
 }

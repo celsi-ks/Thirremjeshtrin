@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { getCraftsman, getReviews, getCategories, getCities } from '@/lib/data';
 import { craftsmanPath, listPath, intlPhone, SITE } from '@/lib/util';
 import { Avatar, Rating, Verified } from '@/components/ui';
-import ContactButtons, { ViewLogger } from '@/components/ContactButtons';
+import ContactButtons, { ViewLogger, ShareButton } from '@/components/ContactButtons';
 import Reviews from '@/components/Reviews';
 
 export const revalidate = 300;
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }) {
   return {
     title, description,
     alternates: { canonical: craftsmanPath(m) },
-    openGraph: { title, description, url: craftsmanPath(m), type: 'profile', images: m.photo_url ? [m.photo_url] : undefined },
+    openGraph: { title, description, url: craftsmanPath(m), type: 'profile' },
   };
 }
 
@@ -63,6 +63,7 @@ export default async function Page({ params }) {
       </div>
       {m.description && <p className="desc">{m.description}</p>}
       <ContactButtons m={m} />
+      <p style={{ margin: '12px 0 0' }}><ShareButton title={`${m.full_name} – ${m.category_name} në ${m.city_name}`} /></p>
       {m.gallery?.length > 0 && (
         <section className="rv">
           <h2>Punët e mia</h2>

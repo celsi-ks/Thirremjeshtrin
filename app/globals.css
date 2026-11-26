@@ -147,3 +147,5 @@ footer small{opacity:.7}
 .links a{font-size:.88rem;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;text-decoration:none}
 .links a:hover{border-color:var(--acc)}
 .linkbtn{font:inherit;font-weight:600;color:var(--ink);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
+.search{margin:22px 0 0;max-width:420px}
+.share{font-size:.95rem;color:var(--mut)}
